@@ -1,4 +1,5 @@
 # Bloques
+from .floor import Floor
 from .bloque_rompible import BloqueRompible
 from .bloque_monedas import BloqueMonedas
 from .bloque_liso import BloqueLiso
