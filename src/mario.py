@@ -90,6 +90,7 @@ class Mario:
         self.__x = x - self.width
         self.wall_left = (True, x)
 
-    def touch_top(self):
+    def touch_top(self, y):
         # Evento de choque por arriba
-        pass 
+        self.__y = max(self.y, y)
+        self.wall_top = (True, y)

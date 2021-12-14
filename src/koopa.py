@@ -1,11 +1,14 @@
 import random
 
 class KoopaTroopa:
-    def __init__(self):
-        self.__x = random.randint(150, 254)
-        self.__y = 50
-        self.__vx = 3
-        self.__vy = 5
+    def __init__(self, x, y):
+        self.__x = x
+        self.__y = y
+        self.__vx = 1
+
+        self.draw = (17, 0)
+        self.width = 14
+        self.height = 15
 
 
     @property
@@ -15,8 +18,6 @@ class KoopaTroopa:
     @property
     def y(self):
         return self.__y
-
-
 
     def update(self):
         self.Mover()

@@ -2,11 +2,15 @@ import pyxel
 
 
 class Estrella:
-    def __init__(self):
-        self.__x = 100
-        self.__y = 50
+    def __init__(self, x, y):
+        self.__x = x
+        self.__y = y
         self.__vx = 3
         self.__vy = 5
+
+        self.draw = (16, 43)
+        self.width = 16
+        self.height = 16
 
 
     @property
@@ -27,7 +31,7 @@ class Estrella:
             self.__vx = -self.__vx
         self.__x += self.__vx
 
-        if pyxel.frame_count % 2 == 0: #Más o menos funciona que salte y rebote, pero creo que haria falta hacer las colisiones
-            self.__y += 48
-        else:
-            self.__y -= 48 
+        # if pyxel.frame_count % 2 == 0: #Más o menos funciona que salte y rebote, pero creo que haria falta hacer las colisiones
+        #     self.__y += 48
+        # else:
+        #     self.__y -= 48 

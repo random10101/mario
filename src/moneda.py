@@ -1,13 +1,13 @@
-class FlorDeFuego:
+class Moneda:
     def __init__(self, x, y):
         self.__x = x
-        self.__y = y - 14
+        self.__y = y - 13
 
-        self.draw = (55, 47)
-        self.width = 14
-        self.height = 14
-         
+        self.draw = (2, 29)
+        self.width = 9
+        self.height = 13
 
+    
     @property
     def x(self):
         return self.__x
@@ -17,11 +17,11 @@ class FlorDeFuego:
         return self.__y
 
     def touch(self, mario):
-        # Evento de interacción con Mario
+        # handle mario interaction
         pass
 
     def update(self, mario, is_closest):
-        # mario colisiona con la flor
+        # Evento de interacción con Mario
         self.touch(mario)
 
         if mario.x > 32:
