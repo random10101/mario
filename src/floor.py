@@ -6,12 +6,8 @@ class Floor:
         self.width = 16
         self.x = x
         self.y = y
-        
-        self.latest_x = None
-
-        # Coordinates of draw in paint resource
         self.draw = (0, 227)
-
+        self.latest_x = None
 
     def update(self, mario):
         # Actualizar posición del suelo

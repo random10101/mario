@@ -26,6 +26,10 @@ class BloqueRompible:
             if (self.__x+self.width-8 <= mario.x <= self.__x+self.width) and ((self.__y <= mario.y+mario.height <= self.__y+self.height) or (self.__y < mario.y < self.__y+self.height)):
                 mario.touch_left(self.__x+self.width+mario.width)
 
+            ## TODO (fix)
+            ## Usar menos margenes en los intervalos para las condiciones
+            ## Pasar la posición REAL de Mario <--
+
             # mario choca por abajo
             if ((self.__x <= mario.x <= self.__x+self.width) or (self.__x <= mario.x+mario.width <= self.__x+self.width)) and (self.__y-16 <= mario.y+mario.height <= self.__y):
                 mario.touch_bottom(self.__y)

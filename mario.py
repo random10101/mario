@@ -17,22 +17,41 @@ class App:
         self.floors = self.create_floors()
         self.blocks_row = self.generate_blocks()
         self.pipes = self.create_pipes()
+        
+        
 
         # Objetos
         self.coins_objects = []
         self.mistery_objects = []
 
         # Generar enemigos
-        self.goombas = self.create_goombas()
-        self.koopas = self.create_koopas()
+        self.enemies = []
+
+        # Generar objetos
         self.stars = self.create_stars()
 
         pyxel.init(256, 256)
         pyxel.run(self.update, self.draw)
 
+    ## TODO
+    ## Get the position of all pipes
+    ## Create blocks NOT above any pipe
+    ## pass valid position to pixel_start arg
+
+    def empty_x_positions(self):
+        return [p.x for p in self.blocks_row]
+
+    # Generar tuberías
+    def create_pipes(self):
+        valid_positions = self.empty_x_positions()
+        # Generar tubería después de la fila bloques
+        n = random.randint(45, 90)
+        pipes = [src.Tuberia(valid_positions[-1]+n, 169)]
+        return pipes
+
     # Generar bloques
     def generate_blocks(self, pixel_start=128):
-        # Crear filas de 3-5 blockes a una altura fija
+        # Crear filas de 3-5 bloques a una altura fija
         n_row = random.randint(3, 5)
         dispatch = [src.BloqueRompible, src.BloqueMonedas, src.BloqueInterrogación, src.BloqueLiso]
 
@@ -50,12 +69,38 @@ class App:
         return blocks
 
     # Generar enemigos
-    def generate_enemies(self):
-        # # Comprobar que no hay más de 4 enemigos activos
-        # weights = [0.75, 0.25]
-        # enemy = random.choices(enemies, weights)
-        pass
+    def random_number_list(self, start, end, length):
+        randomlist = []
+        while len(randomlist) < length:
+            n = random.randint(start, end)
+            if n not in randomlist:
+                randomlist.append(n)
+        return randomlist
 
+    def generate_random_coordinates(self, length):
+        random_ints = self.random_number_list(0, 8, length)
+
+        coordinates = []
+        for n in random_ints:
+            x = pyxel.width + (16*n)
+            y = 216 # Altura del suelo
+            coordinates.append((x, y))
+        return coordinates
+
+
+    def generate_enemies(self):
+        if len(self.enemies) < 4:
+            src_enemies = [src.Goomba, src.KoopaTroopa]
+            weights = [0.75, 0.25]
+            k = 4 - len(self.enemies)
+            new_enemies = random.choices(src_enemies, weights, k=k)
+            # Crear una lista de coordenadas aleatorias 
+            random_coordinates = self.generate_random_coordinates(len(new_enemies))
+            
+            # Asignar a cada objeto unas coordenadas y crear una instancia
+            for enemy_class, coordinates in zip(new_enemies, random_coordinates):
+                new_enemy = enemy_class(*coordinates)
+                self.enemies.append(new_enemy)
 
     def latest_floor(self):
         return max(self.floors, key=lambda obj: obj.x)
@@ -68,20 +113,6 @@ class App:
                 floor = src.Floor(16*i, 216+16*j)
                 floors.append(floor)
         return floors
-
-    def create_pipes(self):
-        pipes = [src.Tuberia(268, 169)]
-        return pipes
-
-    def create_goombas(self):
-        goombas = [src.Goomba(240, 203), 
-                   src.Goomba(240*2, 200)]
-        return goombas
-
-    def create_koopas(self):
-        koopas = [src.KoopaTroopa(140, 201), 
-                  src.KoopaTroopa(140*2, 200)]
-        return koopas
 
     def create_stars(self):
         stars = [src.Estrella(140, 155), 
@@ -97,14 +128,21 @@ class App:
 
     def update(self):
         self.timer.update()
-
         self.mario.update()
         
+        # Actualizar enemigos
+        for enemy in self.enemies:
+            # Desactivar enemigos si se encuentran fuera del mapa
+            enemy.update(self.mario)
+        # Regenerar enemigos una vez inactivos
+        self.enemies = [enemy for enemy in self.enemies if enemy.x > -64]
+        self.generate_enemies()
+
 
         # Actualizar tuberias
         for pipe in self.pipes:
             is_closest = self.is_closest_object_to_mario(pipe)
-            pipe.update(self.mario, is_closest)
+            pipe.update(self.mario, is_closest, self.enemies)
 
         # Actualizar bloques
         for block in self.blocks_row:
@@ -122,20 +160,13 @@ class App:
         # Generar una fila de bloques al principio del mapa
         if self.blocks_row[-1].x < -pyxel.width:
             self.blocks_row = self.generate_blocks(256)
+            self.pipes = self.create_pipes()
         
         # Actualizar suelos
         latest_floor = self.latest_floor()
         for item in self.floors:
             item.latest_x = latest_floor.x
             item.update(self.mario)
-
-        # Actualizar goombas
-        for goomba in self.goombas:
-            goomba.update()
-
-        # Actualizar koopas
-        for koopa in self.koopas:
-            koopa.update()
 
         # Actualizar estrellas
         for star in self.stars:
@@ -184,31 +215,15 @@ class App:
             for x, y in self.clouds:
                 pyxel.blt(x + i * 160 - offset, y, 0, 139, 46, 63, 16)
 
-        # Pintar escalera de bloques lisos
-        # pyxel.blt(144, 152, 0, 0, 62, 16, 16)
-
-        # for i in range(2):
-        #     pyxel.blt(128 + 16 * i, 168, 0, 0, 62, 16, 16)
-
-        # for i in range(3):
-        #     pyxel.blt(112 + 16 * i, 184, 0, 0, 62, 16, 16)
-        
-        # for i in range(4):
-        #     pyxel.blt(96 + 16 * i, 200, 0, 0, 62, 16, 16)
-
-
         # Pintar tuberias
         offset = (pyxel.frame_count // 16) % 160
         for pipe in self.pipes:
             pyxel.blt(pipe.x, pipe.y, 0, *pipe.draw, 32, 47, 12)
 
-        # Pintar goombas
-        for goomba in self.goombas:
-            pyxel.blt(goomba.x, goomba.y, 1, *goomba.draw, goomba.width, goomba.height)
+        # Pintar enemgos
+        for enemy in self.enemies:
+            pyxel.blt(enemy.x, enemy.y, 1, *enemy.draw, enemy.width, enemy.height)
 
-        # Pintar koopas
-        for koopa in self.koopas:
-            pyxel.blt(koopa.x, koopa.y, 1, *koopa.draw, koopa.width, koopa.height)
 
         # Pintar estrellas
         for star in self.stars:
