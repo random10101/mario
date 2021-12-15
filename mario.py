@@ -12,6 +12,7 @@ class App:
         self.timer = src.Timer()
         self.coins = 0
         self.done = 0
+        self.games = 3
 
         self.clouds = [(-10, 50), (40, 75)]
         self.mountains = [(25, 183), (215, 183)]
@@ -26,12 +27,7 @@ class App:
         # Objetos
         self.coins_objects = []
         self.mistery_objects = []
-
-        # Generar enemigos
         self.enemies = []
-
-        # Generar objetos
-        self.stars = self.create_stars()
 
         pyxel.init(256, 256)
         pyxel.run(self.update, self.draw)
@@ -136,11 +132,6 @@ class App:
                 floors.append(floor)
         return floors
 
-    def create_stars(self):
-        stars = [src.Estrella(140, 155), 
-                  src.Estrella(140*2, 155)]
-        return stars
-
     def is_closest_object_to_mario(self, item):
         all_objects = self.pipes + self.blocks_row + self.mistery_objects
         return min(all_objects, key=lambda obj: abs(obj.x-self.mario.x)).x == item.x
@@ -151,9 +142,13 @@ class App:
     def update(self):
         self.timer.update()
         if not self.mario.is_alive:
+            self.games -= 1
             self.__reset()
         self.mario.update()
         
+        if self.games == 0:
+            pyxel.quit()
+
         # Actualizar número de pixeles recorridos por Mario
         if self.mario.vx > 0:
             self.done += self.mario.vx
@@ -161,7 +156,6 @@ class App:
         # Generar fin de la partida
         if self.done > 5000 and self.timer.t > 100:
             self.end = True
-        
         
         # Actualizar enemigos
         for enemy in self.enemies:
@@ -186,11 +180,16 @@ class App:
 
             # Actualizar objetos de bloques interrogación
             if hasattr(block, 'mistery_object_name') and block.show:
-                objs = {'flor':src.FlorDeFuego, 'seta':src.Champiñon, 'moneda':src.Moneda}
+                objs = {'seta':src.Champiñon, 'moneda':src.Moneda}
                 mistery_object_name = block.mistery_object_name
                 block_object = objs[mistery_object_name](block.x, block.y)
                 if not block_object in self.mistery_objects:
                     self.mistery_objects.append(block_object)
+                if mistery_object_name == "moneda" and block.show:
+                    self.score += 10
+                    self.coins += 1
+                    block.hidden = True
+                    block.show = False
 
         # Generar una fila de bloques al principio del mapa
         if self.blocks_row[-1].x < -pyxel.width:
@@ -203,12 +202,9 @@ class App:
             item.latest_x = latest_floor.x
             item.update(self.mario)
 
-        # Actualizar estrellas
-        for star in self.stars:
-            star.update()
-
         # Actualizar objetos especiales
         for item in self.mistery_objects:
+            print(type(item),)
             is_closest = self.is_closest_object_to_mario(block)
             item.update(self.mario, is_closest)
 
@@ -219,14 +215,21 @@ class App:
         pyxel.text(4, 4, s, 7)
 
         # Pintar contador monedas
-        s = "MONEDAS \n{:>7}".format(self.coins)
-        pyxel.text(90, 4, s, 1)
-        pyxel.text(89, 4, s, 7)
+        pyxel.blt(88, 5, 0, 81, 16, 5, 8, 12)
+        s = "x {:>2}".format(self.coins)
+        pyxel.text(96, 7, s, 1)
+        pyxel.text(95, 7, s, 7)
 
         # Pintar timer
         s = "TIME \n{:>4}".format(self.timer.t)
         pyxel.text(45, 4, s, 1)
         pyxel.text(44, 4, s, 7)
+
+        # Pintar vidas
+        pyxel.blt(150, 4, 0, 18, 99, 16, 15, 12)
+        v = "x {:>2}".format(self.games)
+        pyxel.text(171, 10, v, 1)
+        pyxel.text(170, 10, v, 7)
 
     def generate_ending(self):
         pyxel.cls(12)
@@ -280,16 +283,10 @@ class App:
             for enemy in self.enemies:
                 pyxel.blt(enemy.x, enemy.y, 1, *enemy.draw, enemy.width, enemy.height)
 
-
-            # Pintar estrellas
-            for star in self.stars:
-                pyxel.blt(star.x, star.y, 0, *star.draw, star.width, star.height, 12)
-            
-
             # Pintar Mario
             if not self.mario.jumping:
                 # Comprobar si mario ha cogido una seta o no
-                if not self.mario.supermario or not self. mario.mariofuego:
+                if not self.mario.supermario:
                 
                     if self.mario.vx > 0:
                         if pyxel.frame_count % 8 <= 4 and self.mario.vx > 1:
@@ -324,7 +321,7 @@ class App:
                         pyxel.blt(self.mario.x, self.mario.y, 0, 54, 82, 16, 32, 12)
 
             else:
-                if not self.mario.supermario and not self. mario.mariofuego:
+                if not self.mario.supermario:
                     if self.mario.vx >= 0:
                         pyxel.blt(self.mario.x, self.mario.y, 0, 1, 79, 16, 16, 12)
                     else:

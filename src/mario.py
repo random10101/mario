@@ -48,7 +48,10 @@ class Mario:
         self.wall_right = (False, 0)
 
     def reset_distance_to_floor(self):
-        self.distance_to_floor = 200
+        if self.supermario:
+            self.distance_to_floor = 184
+        else:
+            self.distance_to_floor = 200
 
     def update(self):
         if not self.is_alive:
@@ -68,8 +71,7 @@ class Mario:
             self.__vx = 0
     
     def jump(self):
-        # TODO
-        # Saltar si no hay wall_top
+        # Evento de salto
         if pyxel.btn(pyxel.KEY_SPACE) and not self.double_jumping:
             self.__vy = max(self.__vy-6, -12)
             if self.jumping:
@@ -89,12 +91,15 @@ class Mario:
         self.__y = min(self.__y+self.__vy, self.distance_to_floor) 
     
     def touch_bottom(self, y):
-        ## TODO
-        ## Impacto más fluido de Mario con varios bloques en linea
         # Evento de choque por abajo
         self.__y = min(self.y, y+self.height)
         self.wall_bottom = (True, y)
-        self.distance_to_floor = y - 16
+        if not self.supermario:
+            self.distance_to_floor = y - 16
+            self.height = 16
+        else:
+            self.distance_to_floor = y - 32
+            self.height = 32
 
     def touch_right(self, x):
         # Evento de choque por la derecha

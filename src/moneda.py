@@ -16,14 +16,7 @@ class Moneda:
     def y(self):
         return self.__y
 
-    def touch(self, mario):
-        # handle mario interaction
-        pass
-
     def update(self, mario, is_closest):
-        # Evento de interacción con Mario
-        self.touch(mario)
-
         if mario.x >= 128:
             if mario.vx > 0 and not mario.wall_right[0]: 
                 # mario se mueve hacia la derecha y no hay un objeto a su derecha

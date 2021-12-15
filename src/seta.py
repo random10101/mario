@@ -29,19 +29,9 @@ class Champiñon:
             return False
 
     def update(self, mario: Mario, is_closest):
-        if self.__x < 0:
-            self.__vx = -self.__vx
-        elif self.__x > 256 - self.width:
-            self.__vx = -self.__vx
-        self.__x += self.__vx
-        
-        
         # mario colisiona con la seta más cercana
-        # if is_closest and self.__is_active:
         if self.touch(mario):
             mario.supermario = True
-                
-        
 
         if mario.x >= 128:
             if mario.vx > 0 and not mario.wall_right[0]: 
