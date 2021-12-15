@@ -12,7 +12,6 @@ class BloqueInterrogación:
         self.hidden = True
         self.show = False
         self.mistery_object_name = self.generate_object()
-        print(self.mistery_object_name)
 
     @property
     def x(self):
