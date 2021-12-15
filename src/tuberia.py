@@ -36,26 +36,21 @@ class Tuberia:
                 # resetear la distancia al suelo de referencia para que mario pueda caer
                 mario.reset_distance_to_floor()
 
-        if args[0]:
-            for arg in args[0]:
-                # arg choca por su derecha
-                if (self.__x <= arg.x+arg.width <= self.__x+8) and ((self.__y <= arg.y+arg.height <= self.__y+self.height) or (self.__y < arg.y < self.__y+self.height)):
-                    arg.touch_right(self.__x)
+        if args[0]: # Iterable de enemigos en el mapa
+            for enemy in args[0]:
+                # Enemigo choca por su derecha
+                if (self.__x <= enemy.x+enemy.width <= self.__x+8) and ((self.__y <= enemy.y+enemy.height <= self.__y+self.height) or (self.__y < enemy.y < self.__y+self.height)):
+                    enemy.touch_right(self.__x)
 
-                # arg choca por su izquierda
-                if (self.__x+self.width-8 <= arg.x <= self.__x+self.width) and ((self.__y <= arg.y+arg.height <= self.__y+self.height) or (self.__y < arg.y < self.__y+self.height)):
-                    arg.touch_left(self.__x+self.width+arg.width)
+                # Enemigo choca por su izquierda
+                if (self.__x+self.width-8 <= enemy.x <= self.__x+self.width) and ((self.__y <= enemy.y+enemy.height <= self.__y+self.height) or (self.__y < enemy.y < self.__y+self.height)):
+                    enemy.touch_left(self.__x+self.width+enemy.width)
 
 
-
-        if mario.x > 32:
+        if mario.x >= 128:
             if mario.vx > 0 and not mario.wall_right[0]: 
                 # mario se mueve hacia la derecha y no hay un objeto a su derecha
                 self.__x -= mario.vx
             elif mario.vx < 0 and not mario.wall_left[0]: 
                 # mario se mueve a la izquierda y no hay un objeto a su izquierda
                 self.__x -= mario.vx
-
-        # if self.__x < - pyxel.width: # Regenerar tuberia al principio del mapa
-        #     n = random.randint(1, 3)
-        #     self.__x = pyxel.width

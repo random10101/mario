@@ -2,6 +2,7 @@ import random
 
 class KoopaTroopa:
     def __init__(self, x, y):
+        self.is_alive = True
         self.__x = x
         self.__y = y - 15
         self.__vx = 1
@@ -37,7 +38,31 @@ class KoopaTroopa:
         self.wall_left = True
 
     def update(self, mario):
-        if mario.x > 32:
+        # mario choca por su derecha
+        if (self.__x <= mario.x+mario.width <= self.__x+8) and ((self.__y <= mario.y+mario.height <= self.__y+self.height) or (self.__y < mario.y < self.__y+self.height)):
+            if mario.supermario:
+                mario.supermario = False
+            elif mario.mariofuego:
+                mario.mariofuego = False
+            else:
+                mario.is_alive = False
+            self.is_alive = False
+
+        # mario choca por su izquierda
+        if (self.__x+self.width-8 <= mario.x <= self.__x+self.width) and ((self.__y <= mario.y+mario.height <= self.__y+self.height) or (self.__y < mario.y < self.__y+self.height)):
+            if mario.supermario:
+                mario.supermario = False
+            elif mario.mariofuego:
+                mario.mariofuego = False
+            else:
+                mario.is_alive = False
+            self.is_alive = False
+
+        # mario choca por abajo
+        if ((self.__x <= mario.x <= self.__x+self.width) or (self.__x <= mario.x+mario.width <= self.__x+self.width)) and (self.__y-16 <= mario.y+mario.height <= self.__y):
+            self.is_alive = False
+
+        if mario.x >= 128:
             if mario.vx > 0 and not mario.wall_right[0]: 
                 # Mario se mueve hacia la derecha y no hay un objeto a su derecha
                 self.__x -= mario.vx

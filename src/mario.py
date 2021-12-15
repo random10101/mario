@@ -5,13 +5,15 @@ from . import BloqueInterrogación
 
 class Mario:
     def __init__(self):
-        self.__is_alive = True
+        self.is_alive = True
         self.__x = 32
         self.__y = 200
         self.__vx = 0
         self.__vy = 0
         self.height = 16
         self.width = 16
+        self.supermario = False
+        self.mariofuego = False
 
         self.jumping = False
         self.double_jumping = False
@@ -30,6 +32,14 @@ class Mario:
     def y(self):
         return self.__y
 
+    def __reset(self):
+        self.is_alive = True
+        self.__x = 32
+        self.__y = 200
+        self.__vx = 0
+        self.__vy = 0
+        self.reset_collisions()
+
     def reset_collisions(self):
         # Resetear el sistema de colisiones
         self.wall_top = (False, 0)
@@ -41,6 +51,8 @@ class Mario:
         self.distance_to_floor = 200
 
     def update(self):
+        if not self.is_alive:
+            self.__reset()
         self.reset_collisions()
         self.move()
         self.jump()
@@ -56,6 +68,8 @@ class Mario:
             self.__vx = 0
     
     def jump(self):
+        # TODO
+        # Saltar si no hay wall_top
         if pyxel.btn(pyxel.KEY_SPACE) and not self.double_jumping:
             self.__vy = max(self.__vy-6, -12)
             if self.jumping:
@@ -75,6 +89,8 @@ class Mario:
         self.__y = min(self.__y+self.__vy, self.distance_to_floor) 
     
     def touch_bottom(self, y):
+        ## TODO
+        ## Impacto más fluido de Mario con varios bloques en linea
         # Evento de choque por abajo
         self.__y = min(self.y, y+self.height)
         self.wall_bottom = (True, y)

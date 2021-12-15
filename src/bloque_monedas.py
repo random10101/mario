@@ -46,7 +46,6 @@ class BloqueMonedas:
 
             # mario choca por arriba
             if ((self.__x <= mario.x <= self.__x+self.width) or (self.__x <= mario.x+mario.width <= self.__x+self.width)) and (self.__y < mario.y < self.__y+self.height):
-                print("Touch top")
                 if self.coins:
                     self.coin_count = 0
                     self.coins = False
@@ -55,7 +54,7 @@ class BloqueMonedas:
                         self.generate_coins()
                 mario.touch_top(self.__y+self.height)
 
-        if mario.x > 32:
+        if mario.x >= 128:
             if mario.vx > 0 and not mario.wall_right[0]: 
                 # mario se mueve hacia la derecha y no hay un objeto a su derecha
                 self.__x -= mario.vx

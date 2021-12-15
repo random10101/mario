@@ -24,7 +24,7 @@ class FlorDeFuego:
         # mario colisiona con la flor
         self.touch(mario)
 
-        if mario.x > 32:
+        if mario.x >= 128:
             if mario.vx > 0 and not mario.wall_right[0]: 
                 # mario se mueve hacia la derecha y no hay un objeto a su derecha
                 self.__x -= mario.vx

@@ -18,8 +18,6 @@ class App:
         self.blocks_row = self.generate_blocks()
         self.pipes = self.create_pipes()
         
-        
-
         # Objetos
         self.coins_objects = []
         self.mistery_objects = []
@@ -33,10 +31,25 @@ class App:
         pyxel.init(256, 256)
         pyxel.run(self.update, self.draw)
 
-    ## TODO
-    ## Get the position of all pipes
-    ## Create blocks NOT above any pipe
-    ## pass valid position to pixel_start arg
+
+    def __reset(self):
+        self.score = 0
+        self.timer = src.Timer()
+        self.coins = 0
+
+        self.clouds = [(-10, 50), (40, 75)]
+
+        # Generar nivel
+        self.floors = self.create_floors()
+        self.blocks_row = self.generate_blocks()
+        self.pipes = self.create_pipes()
+        
+        # Objetos
+        self.coins_objects = []
+        self.mistery_objects = []
+
+        # Generar enemigos
+        self.enemies = []
 
     def empty_x_positions(self):
         return [p.x for p in self.blocks_row]
@@ -128,14 +141,19 @@ class App:
 
     def update(self):
         self.timer.update()
+        if not self.mario.is_alive:
+            self.__reset()
         self.mario.update()
+        
         
         # Actualizar enemigos
         for enemy in self.enemies:
             # Desactivar enemigos si se encuentran fuera del mapa
             enemy.update(self.mario)
         # Regenerar enemigos una vez inactivos
-        self.enemies = [enemy for enemy in self.enemies if enemy.x > -64]
+        dead_enemies = [enemy for enemy in self.enemies if not enemy.is_alive]
+        self.score += 10 * len(dead_enemies)
+        self.enemies = [enemy for enemy in self.enemies if enemy.x > -64 and enemy.is_alive]
         self.generate_enemies()
 
 
@@ -213,7 +231,7 @@ class App:
         offset = (pyxel.frame_count // 16) % 160
         for i in range(3):
             for x, y in self.clouds:
-                pyxel.blt(x + i * 160 - offset, y, 0, 139, 46, 63, 16)
+                pyxel.blt(x + i * 160 - offset, y, 0, 109, 138, 50, 21, 12)
 
         # Pintar tuberias
         offset = (pyxel.frame_count // 16) % 160
@@ -231,18 +249,53 @@ class App:
         
 
         # Pintar Mario
-        if self.mario.vx > 0:
-            if pyxel.frame_count % 8 <= 4 and self.mario.vx > 1:
-                pyxel.blt(self.mario.x, self.mario.y, 0, 18, 99, 16, 15, 12)
-            else:
-                pyxel.blt(self.mario.x, self.mario.y, 0, 0, 98, 16, 16, 12)
-        elif self.mario.vx < 0:
-            if pyxel.frame_count % 8 <= 4 and self.mario.vx < -1:
-                pyxel.blt(self.mario.x, self.mario.y, 0, 18, 99, -16, 15, 12)
-            else:
-                pyxel.blt(self.mario.x, self.mario.y, 0, 0, 98, -16, 16, 12)
+        if not self.mario.jumping:
+            # Comprobar si mario ha cogido una seta o no
+            if not self.mario.supermario or not self. mario.mariofuego:
+            
+                if self.mario.vx > 0:
+                    if pyxel.frame_count % 8 <= 4 and self.mario.vx > 1:
+                        pyxel.blt(self.mario.x, self.mario.y, 0, 18, 99, 16, 15, 12)
+                    else:
+                        pyxel.blt(self.mario.x, self.mario.y, 0, 0, 98, 16, 16, 12)
+                elif self.mario.vx < 0:
+                    if pyxel.frame_count % 8 <= 4 and self.mario.vx < -1:
+                        pyxel.blt(self.mario.x, self.mario.y, 0, 18, 99, -16, 15, 12)
+                    else:
+                        pyxel.blt(self.mario.x, self.mario.y, 0, 0, 98, -16, 16, 12)
+                else:
+                    pyxel.blt(self.mario.x, self.mario.y, 0, 0, 98, 16, 16, 12)
+
+            elif self.mario.supermario:
+
+                if self.mario.vx > 0:
+                    if pyxel.frame_count % 8 <= 2 and self.mario.vx > 1:
+                        pyxel.blt(self.mario.x, self.mario.y, 0, 73, 83, 16, 31, 12)
+                    elif pyxel.frame_count % 8 <= 4 and self.mario.vx > 1:
+                        pyxel.blt(self.mario.x, self.mario.y, 0, 88, 82, 16, 31, 12)
+                    elif pyxel.frame_count % 8 <= 6 and self.mario.vx > 1:
+                        pyxel.blt(self.mario.x, self.mario.y, 0, 106, 84, 16, 31, 12)
+                    else:
+                        pyxel.blt(self.mario.x, self.mario.y, 0, 54, 82, 16, 32, 12)
+                elif self.mario.vx < 0:
+                    if pyxel.frame_count % 8 <= 4 and self.mario.vx < -1:
+                        pyxel.blt(self.mario.x, self.mario.y, 0, 73, 83, -16, 31, 12)
+                    else:
+                        pyxel.blt(self.mario.x, self.mario.y, 0, 54, 82, -16, 32, 12)
+                else:
+                    pyxel.blt(self.mario.x, self.mario.y, 0, 54, 82, 16, 32, 12)
+
         else:
-            pyxel.blt(self.mario.x, self.mario.y, 0, 0, 98, 16, 16, 12)
+            if not self.mario.supermario and not self. mario.mariofuego:
+                if self.mario.vx >= 0:
+                    pyxel.blt(self.mario.x, self.mario.y, 0, 1, 79, 16, 16, 12)
+                else:
+                    pyxel.blt(self.mario.x, self.mario.y, 0, 1, 79, -16, 16, 12)
+            elif self.mario.supermario:
+                if self.mario.vx >= 0:
+                    pyxel.blt(self.mario.x, self.mario.y, 0, 147, 80, 16, 32, 12)
+                else:
+                    pyxel.blt(self.mario.x, self.mario.y, 0, 147, 80, -16, 32, 12)                
 
         self.draw_score()
         
