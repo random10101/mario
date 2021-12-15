@@ -1,15 +1,20 @@
 import pyxel
+import time
 import random
 import src
 
 
 class App:
     def __init__(self):
+        self.end = False
+        self.end_is_showing = False
         self.score = 0
         self.timer = src.Timer()
         self.coins = 0
+        self.done = 0
 
         self.clouds = [(-10, 50), (40, 75)]
+        self.mountains = [(25, 183), (215, 183)]
 
         self.mario = src.Mario()
 
@@ -33,9 +38,12 @@ class App:
 
 
     def __reset(self):
+        self.end = False
         self.score = 0
         self.timer = src.Timer()
         self.coins = 0
+        self.done = 0        
+
 
         self.clouds = [(-10, 50), (40, 75)]
 
@@ -146,6 +154,14 @@ class App:
             self.__reset()
         self.mario.update()
         
+        # Actualizar número de pixeles recorridos por Mario
+        if self.mario.vx > 0:
+            self.done += self.mario.vx
+
+        # Generar fin de la partida
+        if self.done > 5000 and self.timer.t > 100:
+            self.end = True
+        
         
         # Actualizar enemigos
         for enemy in self.enemies:
@@ -197,108 +213,129 @@ class App:
             item.update(self.mario, is_closest)
 
     def draw_score(self):
-            # Pintar puntuación
-            s = "MARIO \n{:>5}".format(self.score)
-            pyxel.text(5, 4, s, 1)
-            pyxel.text(4, 4, s, 7)
+        # Pintar puntuación
+        s = "MARIO \n{:>5}".format(self.score)
+        pyxel.text(5, 4, s, 1)
+        pyxel.text(4, 4, s, 7)
 
-            # Pintar contador monedas
-            s = "MONEDAS \n{:>7}".format(self.coins)
-            pyxel.text(90, 4, s, 1)
-            pyxel.text(89, 4, s, 7)
+        # Pintar contador monedas
+        s = "MONEDAS \n{:>7}".format(self.coins)
+        pyxel.text(90, 4, s, 1)
+        pyxel.text(89, 4, s, 7)
 
-            # Pintar timer
-            s = "TIME \n{:>4}".format(self.timer.t)
-            pyxel.text(45, 4, s, 1)
-            pyxel.text(44, 4, s, 7)
+        # Pintar timer
+        s = "TIME \n{:>4}".format(self.timer.t)
+        pyxel.text(45, 4, s, 1)
+        pyxel.text(44, 4, s, 7)
+
+    def generate_ending(self):
+        pyxel.cls(12)
+
+        # Pintar mensaje final de partida
+        s = "FIN DE LA PARTIDA"
+        pyxel.text(121-len(s), 100, s, 1)
+        pyxel.text(120-len(s), 100, s, 7)
+        self.end_is_showing = True
 
     def draw(self):
         pyxel.load("assets/mario.pyxres")
         pyxel.cls(12)
-        
-        # Pintar suelo
-        for item in self.floors:
-            pyxel.blt(item.x, item.y, 0, *item.draw, 16, 16)
-        
-        # Pintar filas de bloques
-        for block in self.blocks_row:
-            pyxel.blt(block.x, block.y, 0, *block.draw, block.width, block.height, 12)
 
-        # Pintar objectos especiales
-        for item in self.mistery_objects:
-            pyxel.blt(item.x, item.y, 0, *item.draw, item.width, item.height, 12)
-
-        # Pintar nubes
-        offset = (pyxel.frame_count // 16) % 160
-        for i in range(3):
-            for x, y in self.clouds:
-                pyxel.blt(x + i * 160 - offset, y, 0, 109, 138, 50, 21, 12)
-
-        # Pintar tuberias
-        offset = (pyxel.frame_count // 16) % 160
-        for pipe in self.pipes:
-            pyxel.blt(pipe.x, pipe.y, 0, *pipe.draw, 32, 47, 12)
-
-        # Pintar enemgos
-        for enemy in self.enemies:
-            pyxel.blt(enemy.x, enemy.y, 1, *enemy.draw, enemy.width, enemy.height)
-
-
-        # Pintar estrellas
-        for star in self.stars:
-            pyxel.blt(star.x, star.y, 0, *star.draw, star.width, star.height, 12)
-        
-
-        # Pintar Mario
-        if not self.mario.jumping:
-            # Comprobar si mario ha cogido una seta o no
-            if not self.mario.supermario or not self. mario.mariofuego:
+        if self.end:
+            if self.end_is_showing:
+                time.sleep(2)
+                pyxel.quit()
+            else:
+                self.generate_ending()
+        else:
+            # Pintar suelo
+            for item in self.floors:
+                pyxel.blt(item.x, item.y, 0, *item.draw, 16, 16)
             
-                if self.mario.vx > 0:
-                    if pyxel.frame_count % 8 <= 4 and self.mario.vx > 1:
-                        pyxel.blt(self.mario.x, self.mario.y, 0, 18, 99, 16, 15, 12)
+            # Pintar filas de bloques
+            for block in self.blocks_row:
+                pyxel.blt(block.x, block.y, 0, *block.draw, block.width, block.height, 12)
+
+            # Pintar objectos especiales
+            for item in self.mistery_objects:
+                pyxel.blt(item.x, item.y, 0, *item.draw, item.width, item.height, 12)
+
+            # Pintar nubes
+            offset = (pyxel.frame_count // 16) % 160
+            for i in range(3):
+                for x, y in self.clouds:
+                    pyxel.blt(x + i * 160 - offset, y, 0, 109, 138, 50, 21, 12)
+                    
+            # Pintar montañas
+            offset = (pyxel.frame_count // 32) % 160
+            for x, y in self.mountains:
+                pyxel.blt(x + 160 - offset, y, 0, 0, 193, 74, 33, 12)
+
+            # Pintar tuberias
+            offset = (pyxel.frame_count // 16) % 160
+            for pipe in self.pipes:
+                pyxel.blt(pipe.x, pipe.y, 0, *pipe.draw, 32, 47, 12)
+
+            # Pintar enemgos
+            for enemy in self.enemies:
+                pyxel.blt(enemy.x, enemy.y, 1, *enemy.draw, enemy.width, enemy.height)
+
+
+            # Pintar estrellas
+            for star in self.stars:
+                pyxel.blt(star.x, star.y, 0, *star.draw, star.width, star.height, 12)
+            
+
+            # Pintar Mario
+            if not self.mario.jumping:
+                # Comprobar si mario ha cogido una seta o no
+                if not self.mario.supermario or not self. mario.mariofuego:
+                
+                    if self.mario.vx > 0:
+                        if pyxel.frame_count % 8 <= 4 and self.mario.vx > 1:
+                            pyxel.blt(self.mario.x, self.mario.y, 0, 18, 99, 16, 15, 12)
+                        else:
+                            pyxel.blt(self.mario.x, self.mario.y, 0, 0, 98, 16, 16, 12)
+                    elif self.mario.vx < 0:
+                        if pyxel.frame_count % 8 <= 4 and self.mario.vx < -1:
+                            pyxel.blt(self.mario.x, self.mario.y, 0, 18, 99, -16, 15, 12)
+                        else:
+                            pyxel.blt(self.mario.x, self.mario.y, 0, 0, 98, -16, 16, 12)
                     else:
                         pyxel.blt(self.mario.x, self.mario.y, 0, 0, 98, 16, 16, 12)
-                elif self.mario.vx < 0:
-                    if pyxel.frame_count % 8 <= 4 and self.mario.vx < -1:
-                        pyxel.blt(self.mario.x, self.mario.y, 0, 18, 99, -16, 15, 12)
-                    else:
-                        pyxel.blt(self.mario.x, self.mario.y, 0, 0, 98, -16, 16, 12)
-                else:
-                    pyxel.blt(self.mario.x, self.mario.y, 0, 0, 98, 16, 16, 12)
 
-            elif self.mario.supermario:
+                elif self.mario.supermario:
 
-                if self.mario.vx > 0:
-                    if pyxel.frame_count % 8 <= 2 and self.mario.vx > 1:
-                        pyxel.blt(self.mario.x, self.mario.y, 0, 73, 83, 16, 31, 12)
-                    elif pyxel.frame_count % 8 <= 4 and self.mario.vx > 1:
-                        pyxel.blt(self.mario.x, self.mario.y, 0, 88, 82, 16, 31, 12)
-                    elif pyxel.frame_count % 8 <= 6 and self.mario.vx > 1:
-                        pyxel.blt(self.mario.x, self.mario.y, 0, 106, 84, 16, 31, 12)
+                    if self.mario.vx > 0:
+                        if pyxel.frame_count % 8 <= 2 and self.mario.vx > 1:
+                            pyxel.blt(self.mario.x, self.mario.y, 0, 73, 83, 16, 31, 12)
+                        elif pyxel.frame_count % 8 <= 4 and self.mario.vx > 1:
+                            pyxel.blt(self.mario.x, self.mario.y, 0, 88, 82, 16, 31, 12)
+                        elif pyxel.frame_count % 8 <= 6 and self.mario.vx > 1:
+                            pyxel.blt(self.mario.x, self.mario.y, 0, 106, 84, 16, 31, 12)
+                        else:
+                            pyxel.blt(self.mario.x, self.mario.y, 0, 54, 82, 16, 32, 12)
+                    elif self.mario.vx < 0:
+                        if pyxel.frame_count % 8 <= 4 and self.mario.vx < -1:
+                            pyxel.blt(self.mario.x, self.mario.y, 0, 73, 83, -16, 31, 12)
+                        else:
+                            pyxel.blt(self.mario.x, self.mario.y, 0, 54, 82, -16, 32, 12)
                     else:
                         pyxel.blt(self.mario.x, self.mario.y, 0, 54, 82, 16, 32, 12)
-                elif self.mario.vx < 0:
-                    if pyxel.frame_count % 8 <= 4 and self.mario.vx < -1:
-                        pyxel.blt(self.mario.x, self.mario.y, 0, 73, 83, -16, 31, 12)
+
+            else:
+                if not self.mario.supermario and not self. mario.mariofuego:
+                    if self.mario.vx >= 0:
+                        pyxel.blt(self.mario.x, self.mario.y, 0, 1, 79, 16, 16, 12)
                     else:
-                        pyxel.blt(self.mario.x, self.mario.y, 0, 54, 82, -16, 32, 12)
-                else:
-                    pyxel.blt(self.mario.x, self.mario.y, 0, 54, 82, 16, 32, 12)
+                        pyxel.blt(self.mario.x, self.mario.y, 0, 1, 79, -16, 16, 12)
+                elif self.mario.supermario:
+                    if self.mario.vx >= 0:
+                        pyxel.blt(self.mario.x, self.mario.y, 0, 147, 80, 16, 32, 12)
+                    else:
+                        pyxel.blt(self.mario.x, self.mario.y, 0, 147, 80, -16, 32, 12)                
 
-        else:
-            if not self.mario.supermario and not self. mario.mariofuego:
-                if self.mario.vx >= 0:
-                    pyxel.blt(self.mario.x, self.mario.y, 0, 1, 79, 16, 16, 12)
-                else:
-                    pyxel.blt(self.mario.x, self.mario.y, 0, 1, 79, -16, 16, 12)
-            elif self.mario.supermario:
-                if self.mario.vx >= 0:
-                    pyxel.blt(self.mario.x, self.mario.y, 0, 147, 80, 16, 32, 12)
-                else:
-                    pyxel.blt(self.mario.x, self.mario.y, 0, 147, 80, -16, 32, 12)                
-
-        self.draw_score()
+            self.draw_score()
         
         
 
