@@ -11,13 +11,13 @@ class Floor:
         self.draw = (0, 227)
 
     def update(self, mario):
+        # Regenerar los bloques de suelo
+        if self.x < -pyxel.width:
+            self.x = self.latest_x + 16
+
         # Actualizar posición del suelo
         if mario.x >= 128:
             if mario.vx > 0 and not mario.wall_right[0]: # mario se mueve hacia adelante
                 self.x -= mario.vx
             elif mario.vx < 0 and not mario.wall_left[0]: # mario se mueve hacia atrás
                 self.x -= mario.vx
-        
-        # Regenerar los bloques de suelo
-        if self.x < -pyxel.width: 
-            self.x = self.latest_x + 16

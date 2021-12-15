@@ -116,6 +116,7 @@ class App:
                 self.enemies.append(new_enemy)
 
     def latest_floor(self):
+        # Devuelve el suelo con la coordenada x mayor
         return max(self.floors, key=lambda obj: obj.x)
 
     def create_floors(self):
