@@ -6,42 +6,23 @@ import src
 
 class App:
     def __init__(self):
-        self.end = False
         self.end_is_showing = False
-        self.score = 0
-        self.timer = src.Timer()
-        self.coins = 0
-        self.done = 0
         self.games = 3
-
-        self.clouds = [(-10, 50), (40, 75)]
-        self.mountains = [(25, 183), (215, 183)]
-
+        self.__reset()
         self.mario = src.Mario()
-
-        # Generar nivel
-        self.floors = self.create_floors()
-        self.blocks_row = self.generate_blocks()
-        self.pipes = self.create_pipes()
-        
-        # Objetos
-        self.coins_objects = []
-        self.mistery_objects = []
-        self.enemies = []
 
         pyxel.init(256, 256)
         pyxel.run(self.update, self.draw)
-
 
     def __reset(self):
         self.end = False
         self.score = 0
         self.timer = src.Timer()
         self.coins = 0
-        self.done = 0        
-
+        self.distance_done = 0      
 
         self.clouds = [(-10, 50), (40, 75)]
+        self.mountains = [(25, 183), (215, 183)]
 
         # Generar nivel
         self.floors = self.create_floors()
@@ -51,8 +32,6 @@ class App:
         # Objetos
         self.coins_objects = []
         self.mistery_objects = []
-
-        # Generar enemigos
         self.enemies = []
 
     def empty_x_positions(self):
@@ -151,10 +130,10 @@ class App:
 
         # Actualizar número de pixeles recorridos por Mario
         if self.mario.vx > 0:
-            self.done += self.mario.vx
+            self.distance_done += self.mario.vx
 
         # Generar fin de la partida
-        if self.done > 5000 and self.timer.t > 100:
+        if self.distance_done > 5000 and self.timer.t > 100:
             self.end = True
         
         # Actualizar enemigos
