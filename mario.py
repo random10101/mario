@@ -120,6 +120,10 @@ class App:
 
     def update(self):
         self.timer.update()
+
+        if self.timer.t < 0:
+            pyxel.quit()
+
         if not self.mario.is_alive:
             self.games -= 1
             self.__reset()
